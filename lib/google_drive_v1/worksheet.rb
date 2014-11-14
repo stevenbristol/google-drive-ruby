@@ -333,6 +333,12 @@ module GoogleDriveV1
 
               batch_url = concat_url(@cells_feed_url, "/batch")
               result = @session.request(:post, batch_url, :data => xml, :header => {"Content-Type" => "application/atom+xml;charset=utf-8", "If-Match" => "*"})
+              begin
+                result.css("atom|entry")
+              rescue Exception => e
+                body = result.respond_to?(:body) ? result.body : result
+                raise Exception.new("Original exception: #{e.message} ||| Result body: #{body}")
+              end
               for entry in result.css("atom|entry")
                 interrupted = entry.css("batch|interrupted")[0]
                 if interrupted
